@@ -63,7 +63,7 @@ if choice == "ChatBot RAG":
                     qdrant_url="http://localhost:6333",
                     connection_name="vector_db"
                 )
-                with st.spinner("Creating embeddings..."):
+                with st.spinner("Creating embeddings...."):
                     result = embeddings_manager.create_embeddings(st.session_state['temp_pdf_file'])
                 st.success(result)
                 if session_state['chatbot_manager'] is None:
