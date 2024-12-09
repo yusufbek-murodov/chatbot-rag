@@ -56,7 +56,6 @@ if choice == "ChatBot RAG":
                             device="cpu",
                             encode_kwargs={"normalize_embeddings": True},
                             qdrant_url="http://localhost:6333",
-                            connection_name="vector_db"
                         )
 
                         with st.spinner("Create embeddings..."):
@@ -71,7 +70,6 @@ if choice == "ChatBot RAG":
                                 llm_model='llama3',
                                 temperature=0.7,
                                 qdrant_url="http://localhost:6333",
-                                connection_name="vector_db"
                             )
                     except Exception as e:
                         st.error(f"An unexpected error occurred: {e}")

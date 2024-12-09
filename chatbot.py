@@ -1,19 +1,20 @@
 from langchain_core.prompts import PromptTemplate
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.chains import RetrievalQA
+from langchain.vectorstores import Qdrant
 from qdrant_client import QdrantClient
 from langchain_ollama import ChatOllama
 import streamlit as st
 
 class ChatbotClass:
-    def __init__(self, model_name, device, llm_model, temperature, encode_kwargs, qdrant_url, connection_name):
+    def __init__(self, model_name, device, llm_model, temperature, encode_kwargs, qdrant_url, collection_name):
         self.model_name = model_name
         self.device = device
         self.llm_model = llm_model
         self.temperature = temperature
         self.encode_kwargs = encode_kwargs
         self.qdrant_url = qdrant_url
-        self.connection_name = connection_name
+        self.collection_name = collection_name
 
         self.embeddings = HuggingFaceEmbeddings(
             model_name=self.model_name,
@@ -31,19 +32,20 @@ class ChatbotClass:
         Context: {context}
         Question: {question}
         
-        Only return teh helpful answer. Answer must be detailed and well explained.
-        
+        Only return the helpful answer. Answer must be detailed and well explained.
         '''
 
+        # Initialize Qdrant client
         self.client = QdrantClient(
             url=self.qdrant_url,
             prefer_grpc=False,
         )
 
-        self.db = QdrantClient(
+        # Use Qdrant as a retriever
+        self.db = Qdrant(
             client=self.client,
-            embeddings=self.embeddings,
-            connection_name=self.connection_name
+            embedding_function=self.embeddings.embed_query,
+            collection_name=self.collection_name
         )
 
         self.prompt = PromptTemplate(
@@ -61,7 +63,7 @@ class ChatbotClass:
             llm=self.llm,
             chain_type="stuff",
             retriever=self.retriever,
-            return_source_document=False,
+            return_source_documents=False,
             chain_type_kwargs=self.chain_type_kwargs,
             verbose=False
         )
