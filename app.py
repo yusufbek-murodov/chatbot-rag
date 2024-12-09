@@ -25,7 +25,7 @@ def display(file):
 
 
 st.set_page_config(
-    page_title="Ustudy RAG Application",
+    page_title="RAG Application",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -36,11 +36,11 @@ with st.sidebar:
     choice = st.selectbox("Models:", menu)
 
 if choice == "ChatBot RAG":
-    st.title("ChatBot Llama 3")
+    st.header("ChatBot Llama 3")
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.header("🗃️ Upload your PDF")
+        st.write("🗃️ Upload your PDF")
         uploader_file = st.file_uploader("Upload", type=["pdf"])
         if uploader_file is not None:
             st.success("File is uploaded successfully!")
@@ -52,7 +52,7 @@ if choice == "ChatBot RAG":
                 file.write(uploader_file.getbuffer())
             st.session_state['temp_pdf_file'] = file_path
     with col2:
-        str.header("Embeddings")
+        st.title("Embeddings")
         checkbox_embeddings = st.checkbox("Create embeddings")
         if checkbox_embeddings:
             try:
