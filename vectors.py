@@ -1,9 +1,8 @@
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Qdrant
 import os
-
 
 class Embeddings:
     def __init__(self, model_name, device, encode_kwargs, qdrant_url, connection_name):
@@ -21,20 +20,18 @@ class Embeddings:
 
     def create_embeddings(self, pdf_path):
         if not os.path.exists(pdf_path):
-            raise FileNotFoundError('The file path does not exist')
+            raise FileNotFoundError('The file path does not exist.')
         loader = PyPDFLoader(pdf_path)
         docs = loader.load()
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=250)
         splits = text_splitter.split_documents(docs)
-        try:    
+        try:
             Qdrant.from_documents(
                 splits,
                 self.embeddings,
                 url=self.qdrant_url,
-                connection_name=self.connection_name
+                collection_name=self.connection_name
             )
         except ConnectionError as ce:
-            raise ConnectionError("Failed to connect to Qdrant")
+            raise ConnectionError("Failed to connect to Qdrant.")
         return "Qdrant vector database is created!"
-
-
