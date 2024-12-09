@@ -3,7 +3,7 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.chains import RetrievalQA
 from qdrant_client import QdrantClient
 from langchain_ollama import ChatOllama
-
+import streamlit as st
 
 class ChatbotClass:
     def __init__(self, model_name, device, llm_model, temperature, encode_kwargs, qdrant_url, connection_name):
@@ -25,9 +25,15 @@ class ChatbotClass:
             temperature=self.temperature
         )
         self.prompt_template = '''
-        You are professional analyser.
-        If you don't know the answer, just say that you don't know.
-        Answers should be helpful and well explained with details'''
+        If you don't know the answer, just say that you don't know, don't try to make up an answer.
+        Answer in the language of input message.
+
+        Context: {context}
+        Question: {question}
+        
+        Only return teh helpful answer. Answer must be detailed and well explained.
+        
+        '''
 
         self.client = QdrantClient(
             url=self.qdrant_url,
@@ -40,26 +46,30 @@ class ChatbotClass:
             connection_name=self.connection_name
         )
 
-        self.retriever = self.db.as_retriever(
-            search_kwargs={"k": 1}
-        )
-
         self.prompt = PromptTemplate(
             template=self.prompt_template,
             input_variables=['context', 'question']
         )
 
+        self.retriever = self.db.as_retriever(
+            search_kwargs={"k": 1}
+        )
+
+        self.chain_type_kwargs = {"prompt": self.prompt}
+
         self.qa = RetrievalQA.from_chain_type(
             llm=self.llm,
             chain_type="stuff",
             retriever=self.retriever,
-            chain_type_kwargs={"prompt": self.prompt},
-            return_source_document=False
+            return_source_document=False,
+            chain_type_kwargs=self.chain_type_kwargs,
+            verbose=False
         )
 
     def get_response(self, query):
         try:
             answer = self.qa.run(query)
-        except:
+        except Exception as ex:
+            st.error(ex)
             answer = 'Error'
         return answer

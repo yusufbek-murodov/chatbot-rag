@@ -26,13 +26,15 @@ class Embeddings:
         docs = loader.load()
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=250)
         splits = text_splitter.split_documents(docs)
-
-        Qdrant.from_documents(
-            splits,
-            self.embeddings,
-            url=self.qdrant_url,
-            connection_name=self.connection_name
-        )
+        try:    
+            Qdrant.from_documents(
+                splits,
+                self.embeddings,
+                url=self.qdrant_url,
+                connection_name=self.connection_name
+            )
+        except ConnectionError as ce:
+            raise ConnectionError("Failed to connect to Qdrant")
         return "Qdrant vector database is created!"
 
 
