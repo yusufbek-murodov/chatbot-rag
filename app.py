@@ -51,6 +51,7 @@ if choice == "ChatBot RAG":
             with open(file_path, "wb") as file:
                 file.write(uploader_file.getbuffer())
             st.session_state['temp_pdf_file'] = file_path
+            
     with col2:
         st.title("Embeddings")
         checkbox_embeddings = st.checkbox("Create embeddings")
@@ -80,7 +81,20 @@ if choice == "ChatBot RAG":
                 st.error(file_error)
             except ValueError as ve:
                 st.error(ve)
-            except Exception as e:
-                st.error(e)
+            except Exception as ex:
+                st.error(ex)
 
+    with col3:
+        st.header("Chat")
+        if st.session_state['chatbot_manager'] is None:
+            st.chat_message("Iltimos faylni joylang")
+        else:
+            for message in st.session_state['messages']:
+                st.chat_message(message['role']).markdown(message['content'])
+            input_message = st.chat_input("Iltimos savol bering:")
+            if input_message is not None:
+                st.chat_message('user').markdown(input_message)
+                st.session_state['messages'].append({'role': 'user', 'content': input_message})
+                with st.spinner("Answering..."):
+                    answer = st.session_state['chatbot_manager'].get_response(input_message)
 
